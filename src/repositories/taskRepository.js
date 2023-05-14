@@ -16,6 +16,16 @@ class TaskRepository {
     if (!itemId) return all;
     return all.find(({ id }) => itemId === id);
   }
+
+  async create(data) {
+    const currentFile = await this._currentFileContent();
+    currentFile.push(data);
+    const { id } = data;
+
+    await writeFile(this.file, JSON.stringify(currentFile));
+
+    return id;
+  }
 }
 
 module.exports = TaskRepository;
@@ -25,6 +35,6 @@ const task = new TaskRepository({
 });
 
 task
-  .find()
+  .create({ id: 3, title: "New task" })
   .then(console.log)
   .catch((error) => console.log("error", error));
