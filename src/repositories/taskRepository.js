@@ -1,4 +1,3 @@
-// to handler data with database
 const { readFile, writeFile } = require("node:fs/promises");
 
 class TaskRepository {
@@ -20,21 +19,11 @@ class TaskRepository {
   async create(data) {
     const currentFile = await this._currentFileContent();
     currentFile.push(data);
-    const { id } = data;
 
     await writeFile(this.file, JSON.stringify(currentFile));
 
-    return id;
+    return data.id;
   }
 }
 
 module.exports = TaskRepository;
-
-const task = new TaskRepository({
-  file: "../../database/data.json",
-});
-
-task
-  .create({ id: 3, title: "New task" })
-  .then(console.log)
-  .catch((error) => console.log("error", error));
