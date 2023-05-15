@@ -1,17 +1,17 @@
-import { Database } from "./database.js";
-import { buidRoutePath } from "./utils/build-route-path.js";
-import { randomInt } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
+import { Database } from "./services.js";
+import { buildRoutePath } from "./utils/build-route-path.js";
 
 const database = new Database();
 
 export const routes = [
   {
     method: "POST",
-    path: buidRoutePath("/task"),
+    path: buildRoutePath("/tasks"),
     handler: (request, response) => {
       const { title, description } = request.body;
-      let missingProps = [];
 
+      let missingProps = [];
       if (!title) missingProps.push("title");
       if (!description) missingProps.push("description");
 
@@ -23,7 +23,7 @@ export const routes = [
       }
 
       const task = {
-        id: randomInt(1, 9999),
+        id: randomUUID(),
         title,
         description,
         completed_at: null,
@@ -38,7 +38,7 @@ export const routes = [
   },
   {
     method: "GET",
-    path: buidRoutePath("/tasks"),
+    path: buildRoutePath("/tasks"),
     handler: (request, response) => {
       const { search } = request.query;
 
@@ -52,10 +52,11 @@ export const routes = [
   },
   {
     method: "PUT",
-    path: buidRoutePath("/tasks/:id"),
+    path: buildRoutePath("/tasks/:id"),
     handler: (request, response) => {
       const { id } = request.params;
       const { title, description } = request.body;
+
       let missingProps = [];
 
       if (!title) missingProps.push("title");
@@ -68,7 +69,11 @@ export const routes = [
         return response.status(400).send(missingPropsMessage);
       }
 
-      const [task] = database.select("tasks", id, {
+      const [task] = database.select("tasks", { id });
+
+      if (!task) return response.writeHead(404).end();
+
+      database.update("tasks", id, {
         title,
         description,
         updated_at: new Date().toISOString().slice(0, 10),
@@ -79,7 +84,7 @@ export const routes = [
   },
   {
     method: "DELETE",
-    path: buidRoutePath("/tasks/:id"),
+    path: buildRoutePath("/tasks/:id"),
     handler: (request, response) => {
       const { id } = request.params;
       const [task] = database.select("tasks", { id });
@@ -93,7 +98,7 @@ export const routes = [
   },
   {
     method: "PATCH",
-    path: buidRoutePath("/tasks:id/complete"),
+    path: buildRoutePath("/tasks/:id/complete"),
     handler: (request, response) => {
       const { id } = request.params;
       const [task] = database.select("tasks", { id });

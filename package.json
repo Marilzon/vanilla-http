@@ -5,12 +5,12 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon ./src/index.js"
+    "dev": "node src/server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
+  "dependencies": {
     "csv-parse": "^5.3.10"
   }
 }

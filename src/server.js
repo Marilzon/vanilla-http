@@ -1,11 +1,10 @@
 import http from "node:http";
 
-import { json } from "./middlewares/json.js";
+import { json } from "./middlewares/transportJSON.js";
 import { routes } from "./routes.js";
 import { extractQueryParams } from "./utils/extract-query-params.js";
 
 const PORT = 3333;
-const HOSTNAME = "127.0.0.1";
 
 const server = http.createServer(async (request, response) => {
   const { method, url } = request;
@@ -13,7 +12,7 @@ const server = http.createServer(async (request, response) => {
   await json(request, response);
 
   const route = routes.find((route) => {
-    route.method === method && route.path.test(url);
+    return route.method === method && route.path.test(url);
   });
 
   if (route) {
@@ -22,10 +21,12 @@ const server = http.createServer(async (request, response) => {
     const { query, ...params } = routeParams.groups;
 
     request.params = params;
-    request.query ? extractQueryParams(query) : {};
+    request.query = query ? extractQueryParams(query) : {};
 
     return route.handler(request, response);
   }
+
+  return response.writeHead(404).end();
 });
 
-server.listen(PORT, HOSTNAME);
+server.listen(PORT);
